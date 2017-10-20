@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "noImlicitAny": true,
+    "module": "es6",
+    "target": "es5",
+    "jsx": "react",
+    "aloowJs": true
+  }
+}
