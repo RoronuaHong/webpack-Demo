@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dev-server --open --config webpack.dev.js",
-    "env": "webpack --config webpack.prod.js"
+    "dev": "webpack-dev-server --open --color --config webpack.dev.js",
+    "start": "webpack -p --config webpack.prod.js"
   },
   "author": "slimhong",
   "license": "ISC",
   "dependencies": {
     "clean-webpack-plugin": "^0.1.17",
+    "copy-webpack-plugin": "^4.2.0",
     "extract-text-webpack-plugin": "^3.0.1",
     "html-webpack-plugin": "^2.30.1",
     "uglifyjs-webpack-plugin": "^1.0.0-beta.3",
