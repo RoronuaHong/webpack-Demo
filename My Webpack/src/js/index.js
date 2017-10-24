@@ -1,4 +1,4 @@
-import favicon from "../images/slimlogo.png";
+// import favicon from "../images/slimlogo.png";
 
 ;(function() {
     const a = 1;
