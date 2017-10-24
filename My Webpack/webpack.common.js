@@ -1,5 +1,6 @@
 const path = require("path");
 const glob = require("glob");
+const webpack = require("webpack");
 
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
@@ -11,22 +12,32 @@ const distPath = path.join(__dirname, "dist");
 const imagesPath = path.join(srcPath, "images");
 const newImagePath = path.join(distPath, "images");
 
-//遍历所有的html文件
-const htmlPages = Object.keys(getEntry("./src/**/*.html", "./dist"));
+/*遍历获取所有的html文件*/
+const htmlPages = Object.keys(getEntry("./src/**/*.html", ""));
+
+/*遍历获取所有的js文件*/
+const jsCollection = Object.keys(getEntry("./src/js/*.js", ""));
 
 const config = {
+    /*添加js入口*/
     entry: {
         index: "./src/js/index.js",
-        about: "./src/js/about.js"
+        about: "./src/js/about.js",
+        list: "./src/js/list.js"
     },
     output: {
-        // publicPath: "",
+        publicPath: "/",
         path: distPath,
         filename: "js/[name].[hash].bundle.js",
         chunkFilename: "js/[id].chunk.js"
     },
     module: {
         rules: [
+            /*解决zepto无法模块化的问题*/
+            {
+                test: require.resolve("zepto"),
+                loader: "exports-loader?window.Zepto!script-loader"
+            },
             {
                 test: /\.scss$/,
                 exclude: [
@@ -53,27 +64,16 @@ const config = {
         ]
     },
     plugins: [
-        // /*构建index页*/
-        // new HtmlWebpackPlugin({
-        //     title: "My HTML Template",
-        //     inject: true,
-        //     // favicon: path.join(__dirname, "src/slimlogo.png"),
-        //     template: "src/index.html",
-        //     cache: true,
-        //     filename: path.join(__dirname, "dist/index.html"),
-        //     // minify: {                                               //压缩HTML文件
-        //     //     removeComments: true,                               //移除HTML中的注释
-        //     //     collapseWhitespace: true                            //删除空白符与换行符
-        //     // },
-        //     chunks: ["index"]
-        // }),
-        // /*构建其他子页*/
-        // new HtmlWebpackPlugin({
-        //     title: "My About Page",
-        //     inject: "head",
-        //     favicon: "src/images/slimlogo.png",
-        //     filename: path.join(__dirname , "./dist/cn/about.html")
-        // }),
+        /*加载jQuery或者Zepto*/
+        new webpack.ProvidePlugin({
+            // $: "jquery"
+            $: "zepto"
+        }),
+        /*合并js代码*/
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "vendor",
+            minChunks: 3
+        }),
         new CopyWebpackPlugin([
             {
                 from: imagesPath,
@@ -94,8 +94,23 @@ const confTitle = [
     },
     {
         name: "about",
-        dir: "./cn/",
+        dir: "cn\\",
         title: "这个是关于页"
+    },
+    {
+        name: "list",
+        dir: "cn\\",
+        title: "这个是列表页"
+    },
+    {
+        name: "other",
+        dir: "cn\\",
+        title: "这个是外面的其他页"
+    },
+    {
+        name: "other",
+        dir: "cn\\others\\",
+        title: "这个是其他页"
     }
 ];
 
@@ -106,18 +121,20 @@ htmlPages.forEach(pathname => {
     const resolvePath = pathname.split("src\\");
 
     let conf = {
-        // title: "My Webpack Demo",
         filename: resolvePath[1] + ".html",
         template: pathname + ".html",
-        favicon: "./src/images/slimlogo.png",
-        inject: true
+        inject: true,
+        minify: {                                           //压缩HTML文件
+            removeComments: true,                           //移除HTML中的注释
+            collapseWhitespace: false                       //删除空白符与换行符
+        }
     }
 
-    for(var i in confTitle) {
-        // if (confTitle[i].name === resolvePath[1]) {
-        //     conf.title = confTitle[i].title;
-        // }
-        if (confTitle[i].name === resolvePath[1]) {
+    /*合并公共js代码*/
+    conf.chunks = ["vendor", resolvePath[1]];
+
+    for(let i in confTitle) {
+        if ((confTitle[i].dir + confTitle[i].name) === resolvePath[1]) {
             conf.title = confTitle[i].title;
         }
     }
@@ -128,16 +145,28 @@ htmlPages.forEach(pathname => {
 
 /*按文件名来获取入口文件(即需要生成的模板文件数量)*/
 function getEntry(globPath, dirPath) {
+
+    //匹配当前路径所得到的文件数组
     let files = glob.sync(globPath),
         entries = {},
         entry, dirname, basename, pathname, extname;
 
     for(let i = 0; i < files.length; i++) {
         entry = files[i];
+
+        //返回所在路径的文件夹名称
         dirname = path.dirname(entry);
+
+        //返回指定文件名的扩展名称
         extname = path.extname(entry);
+
+        //返回制定的文件名, 返回结果可排除[ext]后缀字符串
         basename = path.basename(entry, extname);
+
+        //格式化路径
         pathname = path.normalize(path.join(dirname, basename));
+
+        //格式化路径
         dirPath = path.normalize(dirPath);
 
         if(pathname.startsWith(dirPath)) {
