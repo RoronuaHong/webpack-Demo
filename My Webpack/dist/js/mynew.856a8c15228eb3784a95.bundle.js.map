@@ -1,0 +1,1 @@
+{"version":3,"file":"js/mynew.856a8c15228eb3784a95.bundle.js","sources":["webpack:///./src/js/mynew.js"],"sourcesContent":[";(function() {\r\n    console.log(123);\r\n})();\r\n\n\n\n//////////////////\n// WEBPACK FOOTER\n// ./src/js/mynew.js\n// module id = 0\n// module chunks = 4"],"mappings":"AACA","sourceRoot":""}

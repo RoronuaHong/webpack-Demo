@@ -1,96 +1,18 @@
 const path = require("path");
 const glob = require("glob");
 const webpack = require("webpack");
-
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 /*设置路径*/
 const srcPath = path.join(__dirname, "src");
 const distPath = path.join(__dirname, "dist");
-const imagesPath = path.join(srcPath, "images");
-const newImagePath = path.join(distPath, "images");
 
 /*遍历获取所有的html文件*/
 const htmlPages = Object.keys(getEntry("./src/**/*.html", ""));
 
 /*遍历获取所有的js文件*/
-const jsCollection = Object.keys(getEntry("./src/js/*.js", ""));
-
-const config = {
-    /*添加js入口*/
-    entry: {
-        mynew: "./src/js/mynew.js",
-        index: "./src/js/index.js",
-        about: "./src/js/about.js",
-        list: "./src/js/list.js",
-        other: "./src/js/other.js",
-        teacher: "./src/js/teacher.js"
-    },
-    output: {
-        publicPath: "/",
-        path: distPath,
-        filename: "js/[name].[hash].bundle.js",
-        chunkFilename: "js/[id].chunk.js"
-    },
-    module: {
-        rules: [
-            /*解决zepto无法模块化的问题*/
-            {
-                test: require.resolve("zepto"),
-                loader: "exports-loader?window.Zepto!script-loader"
-            },
-            {
-                test: /\.scss$/,
-                exclude: [
-                    path.join(__dirname, "node_modules")
-                ],
-                use: ExtractTextPlugin.extract({
-                    fallback: "style-loader",
-                    use: [
-                        "css-loader",
-                        "sass-loader"
-                    ]
-                })
-            },
-            {
-                test: /\.(png|svg|jpg|gif)$/,
-                exclude: [
-                    path.join(__dirname, "node_modules")
-                ],
-                loader: "file-loader",
-                options: {
-                    outputPath: imagesPath
-                }
-            }
-        ]
-    },
-    plugins: [
-        /*加载jQuery或者Zepto*/
-        new webpack.ProvidePlugin({
-            // $: "jquery",
-            // jQuery: "jquery",
-            // "window.jQuery": "jquery",
-            $: "zepto"
-        }),
-        /*合并js代码*/
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "vendor",
-            // chunks: jsCollection,
-            // chunks: ["about", "index", "list", "mynew", "other", "teacher"],
-            minChunks: 3
-        }),
-        new CopyWebpackPlugin([
-            {
-                from: imagesPath,
-                to: newImagePath
-            }
-        ])
-    ]
-}
-
-module.exports = config;
+// const jsCollection = Object.keys(getEntry("./src/js/*.js", ""));
 
 //生成页面的title
 const confTitle = [
@@ -125,11 +47,107 @@ const confTitle = [
         title: "教师节活动回顾"
     },
     {
-        name: "other",
+        name: "others",
         dir: "cn\\others\\",
         title: "这个是其他页"
     }
 ];
+
+const config = {
+    /*添加js入口*/
+    entry: {
+        mynew: "./src/js/mynew.js",
+        index: "./src/js/index.js",
+        about: "./src/js/about.js",
+        list: "./src/js/list.js",
+        other: "./src/js/other.js",
+        others: "./src/js/others.js",
+        teacher: "./src/js/teacher.js"
+    },
+    output: {
+        publicPath: "/",
+        path: distPath,
+        filename: "js/[name].[hash].bundle.js",
+        chunkFilename: "js/[id].chunk.js"
+    },
+    module: {
+        rules: [
+            /*解决zepto无法模块化的问题*/
+            {
+                test: require.resolve("zepto"),
+                loader: "exports-loader?window.Zepto!script-loader"
+            },
+            /*压缩css*/
+            {
+                test: /\.css$/,
+                exclude: [
+                    path.join(__dirname, "node_modules")
+                ],
+                use: ExtractTextPlugin.extract({
+                    fallback: "style-loader",
+                    use: [
+                        {
+                            loader: "css-loader",
+                            options: {
+                                minimize: true
+                            }
+                        }
+                    ]
+                })
+            },
+            /*压缩sass并转换为css*/
+            {
+                test: /\.scss$/,
+                exclude: [
+                    path.join(__dirname, "node_modules")
+                ],
+                use: ExtractTextPlugin.extract({
+                    fallback: "style-loader",
+                    use: [
+                        {
+                            loader: "css-loader",
+                            options: {
+                                minimize: true
+                            }
+                        }, "sass-loader"
+                    ],
+                })
+            },
+            /*压缩图片*/
+            {
+                test: /\.(png|svg|jpg|gif|jpeg)$/,
+                use: [
+                    "file-loader",
+                    "url-loader?limit=8192&name=images/[hash:12].[name].[ext]",
+                    "image-webpack-loader?{pngquant:{quality: '50-70', speed: 8}, mozjpeg: {quality: 50}}"
+                ]
+            }
+        ]
+    },
+    plugins: [
+        /*加载jQuery或者Zepto*/
+        new webpack.ProvidePlugin({
+            // $: "jquery",
+            // jQuery: "jquery",
+            // "window.jQuery": "jquery",
+            $: "zepto"
+        }),
+        /*合并js代码*/
+        new webpack.optimize.CommonsChunkPlugin({
+            name: "vendor",
+            // chunks: jsCollection,
+            // chunks: ["about", "index", "list", "mynew", "other", "teacher"],
+            minChunks: 3
+        }),
+        /*生成css*/
+        new ExtractTextPlugin({
+            filename: "css/[name].[hash].bundle.css",
+            allChunks: true,
+        })
+    ]
+}
+
+module.exports = config;
 
 //生成的html存放路径
 htmlPages.forEach(pathname => {
