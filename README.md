@@ -1,5 +1,4 @@
 # webpack-Demo
 
-    1.尝试使用webpack的一些功能。
-    
-    2.最终达到使用webpack构建项目的效果。
+    1.webpack多页自动化工程工具使用方法：
+
