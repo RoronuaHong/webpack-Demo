@@ -65,7 +65,7 @@ const config = {
         teacher: "./src/js/teacher.js"
     },
     output: {
-        publicPath: "/",
+        publicPath: "./",
         path: distPath,
         filename: "js/[name].[hash].bundle.js",
         chunkFilename: "js/[id].chunk.js"
@@ -117,8 +117,8 @@ const config = {
             {
                 test: /\.(png|svg|jpg|gif|jpeg)$/,
                 use: [
-                    "file-loader",
-                    "url-loader?limit=8192&name=images/[hash:12].[name].[ext]",
+                    // "file-loader",
+                    "url-loader?limit=8192&name=images/[name].[ext]",
                     "image-webpack-loader?{pngquant:{quality: '50-70', speed: 8}, mozjpeg: {quality: 50}}"
                 ]
             }
@@ -142,7 +142,7 @@ const config = {
         /*生成css*/
         new ExtractTextPlugin({
             filename: "css/[name].[hash].bundle.css",
-            allChunks: true,
+            allChunks: true
         })
     ]
 }
@@ -159,9 +159,10 @@ htmlPages.forEach(pathname => {
         filename: resolvePath[1] + ".html",
         template: pathname + ".html",
         inject: true,
+        favicon: "./src/images/slimlogo.png",               //设置icon图标
         minify: {                                           //压缩HTML文件
             removeComments: true,                           //移除HTML中的注释
-            collapseWhitespace: false                       //删除空白符与换行符
+            collapseWhitespace: true                       //删除空白符与换行符
         }
     }
 

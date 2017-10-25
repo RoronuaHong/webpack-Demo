@@ -1,1 +1,0 @@
-{"version":3,"file":"js/list.856a8c15228eb3784a95.bundle.js","sources":["webpack:///./src/js/list.js"],"sourcesContent":["\r\n\r\n;(function() {\r\n    console.log(1);\r\n})();\r\n\n\n\n//////////////////\n// WEBPACK FOOTER\n// ./src/js/list.js\n// module id = 6\n// module chunks = 5"],"mappings":"AAGA","sourceRoot":""}
