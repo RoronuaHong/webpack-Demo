@@ -21,9 +21,12 @@ const jsCollection = Object.keys(getEntry("./src/js/*.js", ""));
 const config = {
     /*添加js入口*/
     entry: {
+        mynew: "./src/js/mynew.js",
         index: "./src/js/index.js",
         about: "./src/js/about.js",
-        list: "./src/js/list.js"
+        list: "./src/js/list.js",
+        other: "./src/js/other.js",
+        teacher: "./src/js/teacher.js"
     },
     output: {
         publicPath: "/",
@@ -66,12 +69,16 @@ const config = {
     plugins: [
         /*加载jQuery或者Zepto*/
         new webpack.ProvidePlugin({
-            // $: "jquery"
+            // $: "jquery",
+            // jQuery: "jquery",
+            // "window.jQuery": "jquery",
             $: "zepto"
         }),
         /*合并js代码*/
         new webpack.optimize.CommonsChunkPlugin({
             name: "vendor",
+            // chunks: jsCollection,
+            // chunks: ["about", "index", "list", "mynew", "other", "teacher"],
             minChunks: 3
         }),
         new CopyWebpackPlugin([
@@ -87,6 +94,11 @@ module.exports = config;
 
 //生成页面的title
 const confTitle = [
+    {
+        name: "mynew",
+        dir: "",
+        title: "这是新一页"
+    },
     {
         name: "index",
         dir: "",
@@ -106,6 +118,11 @@ const confTitle = [
         name: "other",
         dir: "cn\\",
         title: "这个是外面的其他页"
+    },
+    {
+        name: "teacher",
+        dir: "cn\\",
+        title: "教师节活动回顾"
     },
     {
         name: "other",
@@ -131,7 +148,11 @@ htmlPages.forEach(pathname => {
     }
 
     /*合并公共js代码*/
-    conf.chunks = ["vendor", resolvePath[1]];
+    const reg = /\/?(\w+)$/;
+    const currentPath = (reg.exec(resolvePath[1]))[1];
+
+    // const currentPath = resolvePath[1].split("\\")[resolvePath[1].split("\\").length - 1];
+    conf.chunks = ["vendor", currentPath];
 
     for(let i in confTitle) {
         if ((confTitle[i].dir + confTitle[i].name) === resolvePath[1]) {
