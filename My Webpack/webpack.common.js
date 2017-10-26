@@ -5,7 +5,7 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 /*设置路径*/
-const srcPath = path.join(__dirname, "src");
+// const srcPath = path.join(__dirname, "src");
 const distPath = path.join(__dirname, "dist");
 
 /*遍历获取所有的html文件*/
@@ -76,6 +76,22 @@ const config = {
     },
     module: {
         rules: [
+            /*将ES6语法转换成ES5语法*/
+            {
+                test: /\.js$/,
+                exclude: [
+                    path.join(__dirname, "node_modules")
+                ],
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: ["env"],
+                        plugins: [
+                            "transform-runtime"
+                        ]
+                    }
+                }
+            },
             /*解决zepto无法模块化的问题*/
             {
                 test: require.resolve("zepto"),
