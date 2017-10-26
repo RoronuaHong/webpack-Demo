@@ -56,6 +56,7 @@ const confTitle = [
 const config = {
     /*添加js入口*/
     entry: {
+        flexible: "lib-flexible",
         mynew: "./src/js/mynew.js",
         index: "./src/js/index.js",
         about: "./src/js/about.js",
@@ -65,10 +66,13 @@ const config = {
         teacher: "./src/js/teacher.js"
     },
     output: {
-        publicPath: "./",
+        publicPath: "",
         path: distPath,
         filename: "js/[name].[hash].bundle.js",
         chunkFilename: "js/[id].chunk.js"
+    },
+    resolve: {
+        extensions: [".js", ".css", ".scss", ".png", ".jpg", ".jpeg", ".gif"]
     },
     module: {
         rules: [
@@ -91,6 +95,30 @@ const config = {
                             options: {
                                 minimize: true
                             }
+                        },
+                        {
+                            loader: "postcss-loader",
+                            options: {
+                                ident: 'postcss',
+                                plugins: [
+                                    require('autoprefixer')({
+                                        browsers: [
+                                            'Chrome >= 35',
+                                            'Firefox >= 38',
+                                            'Edge >= 12',
+                                            'Explorer >= 10',
+                                            'iOS >= 8',
+                                            'Safari >= 8',
+                                            'Android 2.3',
+                                            'Android >= 4',
+                                            'Opera >= 12'
+                                        ],
+                                        cascade: true,
+                                        add: true,
+                                        remove: true
+                                    })
+                                ]
+                            }
                         }
                     ]
                 })
@@ -104,12 +132,54 @@ const config = {
                 use: ExtractTextPlugin.extract({
                     fallback: "style-loader",
                     use: [
+                        /*将px转换成rem*/
+                        {
+                            loader: "webpack-px-to-rem",
+                            query:{
+                                // 1rem=npx 默认为 75
+                                basePx: 75,
+                                // 只会转换大于min的px 默认为0
+                                // 因为很小的px（比如border的1px）转换为rem后在很小的设备上结果会小于1px，有的设备就会不显示
+                                min: 1,
+                                // 转换后的rem值保留的小数点后位数 默认为3
+                                floatWidth: 2
+                            }
+                        },
+                        /*压缩css*/
                         {
                             loader: "css-loader",
                             options: {
                                 minimize: true
                             }
-                        }, "sass-loader"
+                        },
+                        {
+                            loader: "sass-loader"
+                        },
+                        /*配置自动前缀*/
+                        {
+                            loader: "postcss-loader",
+                            options: {
+                                ident: 'postcss',
+                                plugins: [
+                                    require('autoprefixer')({
+                                        browsers: [
+                                            'Chrome >= 35',
+                                            'Firefox >= 38',
+                                            'Edge >= 12',
+                                            'Explorer >= 10',
+                                            'iOS >= 8',
+                                            'Safari >= 8',
+                                            'Android 2.3',
+                                            'Android >= 4',
+                                            'Opera >= 12'
+                                        ],
+                                        cascade: true,
+                                        add: true,
+                                        remove: true
+                                    })
+                                ]
+                            }
+                        }
                     ],
                 })
             },
@@ -133,12 +203,13 @@ const config = {
             $: "zepto"
         }),
         /*合并js代码*/
-        new webpack.optimize.CommonsChunkPlugin({
-            name: "vendor",
-            // chunks: jsCollection,
-            // chunks: ["about", "index", "list", "mynew", "other", "teacher"],
-            minChunks: 3
-        }),
+        // new webpack.optimize.CommonsChunkPlugin({
+        //     name: "vendor",
+        //     // filename: "js/vendor.js",
+        //     // chunks: jsCollection,
+        //     // chunks: ["about", "index", "list", "mynew", "other", "teacher"],
+        //     minChunks: 3
+        // }),
         /*生成css*/
         new ExtractTextPlugin({
             filename: "css/[name].[hash].bundle.css",
@@ -162,7 +233,7 @@ htmlPages.forEach(pathname => {
         favicon: "./src/images/slimlogo.png",               //设置icon图标
         minify: {                                           //压缩HTML文件
             removeComments: true,                           //移除HTML中的注释
-            collapseWhitespace: true                       //删除空白符与换行符
+            collapseWhitespace: false                       //删除空白符与换行符
         }
     }
 
@@ -171,7 +242,8 @@ htmlPages.forEach(pathname => {
     const currentPath = (reg.exec(resolvePath[1]))[1];
 
     // const currentPath = resolvePath[1].split("\\")[resolvePath[1].split("\\").length - 1];
-    conf.chunks = ["vendor", currentPath];
+    // conf.chunks = ["vendor", "flexible", currentPath];
+    conf.chunks = ["flexible", currentPath];
 
     for(let i in confTitle) {
         if ((confTitle[i].dir + confTitle[i].name) === resolvePath[1]) {
@@ -185,7 +257,6 @@ htmlPages.forEach(pathname => {
 
 /*按文件名来获取入口文件(即需要生成的模板文件数量)*/
 function getEntry(globPath, dirPath) {
-
     //匹配当前路径所得到的文件数组
     let files = glob.sync(globPath),
         entries = {},
