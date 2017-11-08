@@ -151,7 +151,7 @@ const config = {
                         /*将px转换成rem*/
                         {
                             loader: "webpack-px-to-rem",
-                            query:{
+                            query: {
                                 // 1rem=npx 默认为 75
                                 basePx: 75,
                                 // 只会转换大于min的px 默认为0
@@ -249,7 +249,7 @@ htmlPages.forEach(pathname => {
         favicon: "./src/images/slimlogo.png",               //设置icon图标
         minify: {                                           //压缩HTML文件
             removeComments: true,                           //移除HTML中的注释
-            collapseWhitespace: false                       //删除空白符与换行符
+            collapseWhitespace: true                        //删除空白符与换行符
         }
     }
 
