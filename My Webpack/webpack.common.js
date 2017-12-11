@@ -66,7 +66,7 @@ const config = {
         teacher: "./src/js/teacher.js"
     },
     output: {
-        publicPath: "",
+        publicPath: "/",
         path: distPath,
         filename: "js/[name].[hash].bundle.js",
         chunkFilename: "js/[id].chunk.js"
